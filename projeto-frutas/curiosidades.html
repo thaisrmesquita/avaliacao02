@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Frutas - Curiosidades</title>
+  <script src="vue.min.js"></script>
+  <script src="axios.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="materialize/css/materialize.css">
+  <script type="text/javascript" src="materialize/js/materialize.js"></script>
+  <link rel="stylesheet" type="text/css" href="meuCss/estilo.css">
+</head>
+
+<body>
+
+  <header>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">API Frutas</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="frutas.html">Frutas</a></li>
+          <li><a href="grupos.html">Grupos</a></li>
+          <li><a href="propriedades.html">Propriedades</a></li>
+          <li><a href="curiosidades.html">Curiosidades</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  
+  <div id="principal">
+
+  <div id = "app">
+
+        <!--Adiciona grupo-->
+        <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Adicionar</a>
+
+        <!-- Modal Structure -->
+        <div id="modal1" class="modal">
+          <div class="modal-content">
+            <h4>Adicionar Curiosidade</h4>
+            <p>Adicionando uma curiosidade...</p>
+            <input v-model = "novaCuriosidade.name" placeholder = "Nome da curiosidade">
+            <input v-model = "novaCuriosidade.descricao" placeholder = "Descrição">
+            <input v-model = "novaCuriosidade.fruta" placeholder = "Fruta relacionada">
+          </div>
+          <div class="modal-footer">
+            <a @click.prevent = "adicionarCuriosidade" class="modal-close waves-effect waves-green btn-flat">Adicionar</a>
+          </div>
+        </div>
+        <!--Fim do AdicionaGrupo-->
+
+        <!--Excluir grupo-->
+        <!-- Modal Trigger -->
+        <a class="waves-effect waves-light btn modal-trigger" href="#modal2">Excluir</a>
+
+        <!-- Modal Structure -->
+        <div id="modal2" class="modal">
+          <div class="modal-content">
+            <h4>Excluir Curiosidade</h4>
+            <p>Excluindo uma curiosidade...</p>
+            <input v-model = "idAserExcluido" placeholder = "Id da curiosidade">
+          </div>
+          <div class="modal-footer">
+            <a @click.prevent = "excluirCuriosidade" class="modal-close waves-effect waves-green btn-flat">Excluir</a>
+          </div>
+        </div>
+        <!--Fim do Excluir Grupo-->
+
+     
+      <div v-for = "curiosidade in curiosidades" class = "curiosidades">
+
+        <div class="container">
+          <div class="col s12 m6">
+            <div class="card blue-grey darken-1">
+              <div class="card-content white-text">
+                <span class="card-title">{{curiosidade.name}} ( {{curiosidade.id}} )</span>
+                <p>{{curiosidade.descricao}}</p>
+                <p>Fruta: {{curiosidade.fruta}}</p>
+              </div>
+              <!--
+              <div class="card-action">
+                <a href="#">This is a link</a>
+                <a href="#">This is a link</a>
+              </div>
+            -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+        
+      </div>
+  </div>
+
+  </div>
+    
+  <footer class="page-footer">
+    <div class="footer-copyright">
+        <div class="container">
+          Frutas© 2018. Todos os direitos reservados.
+        </div>
+    </div>
+  </footer>        
+
+</body>
+
+<script type="text/javascript">
+    var app = new Vue({
+      el : '#app',
+      data : { 
+        curiosidades : [],
+        novaCuriosidade: {name: '', descricao: '', fruta:''},
+        idAserExcluido: '',
+        response: '',
+        errors: ''
+        
+      },
+      mounted() {
+        this.listar();
+      },
+      methods : {
+        listar: function(){
+            axios.get('http://localhost:8000/curiosidades')
+            .then(response => {              
+              this.curiosidades = response.data.results
+              console.log(response.data.results)
+            })
+
+          },
+
+        adicionarCuriosidade: function(){
+          var objeto = {name: this.novaCuriosidade.name, descricao: this.novaCuriosidade.descricao, fruta: this.novaCuriosidade.fruta};
+          //this.propriedades.push(objeto);
+          console.log(objeto);
+          axios.post('http://localhost:8000/curiosidades/', objeto)
+                    .then(response => {
+                        this.response = response
+                        this.erro = ''
+                        this.listar();
+                        window.alert(objeto.name + " foi adicionada! :)");
+                        this.listar();
+                    })
+                    .catch(errors => {
+                    	this.errors = errors;
+                        if (errors == "Error: Request failed with status code 400") {
+                        	window.alert("Requisição inválida. Por favor verifique os campos novamente.");
+                        }              
+                    });
+          
+        },
+      	
+        excluirCuriosidade : function() {
+
+          axios.delete('http://localhost:8000/curiosidades/' + this.idAserExcluido + '/')
+            .then( response => {
+              this.listar();
+              window.alert("Curiosidade foi excluida!");
+            })
+            .catch( errors => {
+              console.log(errors)
+              if (errors == "Error: Request failed with status code 404") {
+                window.alert("Não há curiosidade com o id informado.");
+              }
+            })
+        }
+        
+      }
+    });
+
+    //Script pra abrir o Modal
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems);
+    })
+   
+
+  </script>
+</html>

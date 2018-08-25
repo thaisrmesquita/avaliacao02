@@ -1,0 +1,25 @@
+header {
+	text-align: center;
+}
+
+footer {
+	text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+#principal {
+	width: 60%;
+	margin: auto;
+}
+
+.myImagem{
+	max-width:400px;
+    max-height:400px;
+    min-width: 400px;
+    min-height: 300px;
+    width: auto;
+    height: auto;
+    margin: auto;
+}

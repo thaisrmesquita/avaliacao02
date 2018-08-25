@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Frutas</title>
+  <script src="vue.min.js"></script>
+  <script src="axios.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="materialize/css/materialize.css">
+  <script type="text/javascript" src="materialize/js/materialize.js"></script>
+  <link rel="stylesheet" type="text/css" href="meuCss/estilo02.css">
+</head>
+
+<body>
+
+  <header>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">API Frutas</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="frutas.html">Frutas</a></li>
+          <li><a href="grupos.html">Grupos</a></li>
+          <li><a href="propriedades.html">Propriedades</a></li>
+          <li><a href="curiosidades.html">Curiosidades</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <div id="principal">
+
+  <div id = "app">
+
+      <!--Adiciona Fruta-->
+      <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Adicionar</a>
+        <!-- Modal Structure -->
+        <div id="modal1" class="modal">
+          <div class="modal-content">
+            <h4>Adicionar Fruta</h4>
+            <p>Adicionando uma fruta...</p>
+            <input v-model = "novaFruta.name" placeholder = "Nome da fruta">
+            <input v-model = "novaFruta.descricao" placeholder = "Descrição">
+            <input v-model = "novaFruta.imagem" placeholder = "Link da imagem">
+            <input v-model = "novaFruta.grupo" placeholder = "Grupo relacionado">
+            <!--Fica faltando o Select de Grupo-->
+            <!--Select Grupo-->
+            <!--Fim select grupo-->
+          </div>
+         <div class="modal-footer">
+            <a @click.prevent = "adicionarFruta" class="modal-close waves-effect waves-green btn-flat">Adicionar</a>
+          </div>
+        </div>
+      <!--Fim do Adiciona Fruta-->
+
+      <!--Excluir Fruta-->
+      <!-- Modal Trigger -->
+        <a class="waves-effect waves-light btn modal-trigger" href="#modal2">Excluir</a>
+        <!-- Modal Structure -->
+        <div id="modal2" class="modal">
+          <div class="modal-content">
+            <h4>Excluir Fruta</h4>
+            <p>Excluindo um fruta...</p>
+            <input v-model = "idAserExcluido" placeholder = "Id da fruta">
+          </div>
+          <div class="modal-footer">
+            <a @click.prevent = "excluirFruta" class="modal-close waves-effect waves-green btn-flat">Excluir</a>
+          </div>
+        </div>
+      <!--Fim do Excluir Fruta-->
+
+      <a href="fruta - editar.html" class="waves-effect waves-light btn">Editar</a>
+
+      <div v-for = "fruta in frutas" class = "frutas">
+
+        <div class="card">
+          <div class="card-image waves-effect waves-block waves-light">
+            <img class="activator myImagem" v-bind:src="fruta.imagem">
+          </div>
+          <div class="card-content">  
+            <span class="card-title activator grey-text text-darken-4">{{fruta.name}} ( {{fruta.id}} )<i class="material-icons right">Descrição</i></span>
+
+          </div>
+          <div class="card-reveal">
+              <span class="card-title grey-text text-darken-4">{{fruta.name}} ( {{fruta.id}} )<i class="material-icons right">Fechar</i></span>
+              <p><strong>Grupo:</strong> {{fruta.grupo}}</p>
+              <p><strong>Descrição:</strong> {{fruta.descricao}}</p>
+              <!--Listando propriedaes-->
+              <ul class="collection">
+                <li class="collection-header"><h6><strong>Propriedades</strong></h6></li>
+                <div v-for = "propriedade in fruta.propriedades">
+                  <li class="collection-item">{{propriedade}}</li>
+                </div>
+              </ul>
+              <!--Listando curiosidades-->
+              <ul class="collection">
+                <li class="collection-header"><h6><strong>Curiosidades</strong></h6></li>
+                <div v-for = "curiosidade in fruta.curiosidades">
+                  <li class="collection-item">{{curiosidade}}</li>
+                </div>
+              </ul>
+          </div>
+
+        </div>
+        </div>
+        
+      </div>
+
+  </div>
+            
+</body>
+<footer class="page-footer">
+    <div class="footer-copyright">
+        <div class="container">
+          Frutas© 2018. Todos os direitos reservados.
+        </div>
+    </div>
+  </footer>
+
+
+<script type="text/javascript">
+    var app = new Vue({
+      el : '#app',
+      data : { 
+        frutas : [],
+        novaFruta: {name: '', descricao: '', imagem: '', grupo:  ''},
+        grupos: [],
+        idAserExcluido: '',
+        
+      },
+      mounted() {
+        this.listar();
+      },
+      methods : {
+      	listar: function(){
+            axios.get('http://localhost:8000/frutas')
+            .then(response => {              
+              this.frutas = response.data.results
+              console.log(response.data.results)
+            })
+
+          },
+
+        adicionarFruta: function(){
+          //Aqui o Grupo vai ficar nulo, pra quando eu descobrir como fazer o select funcionar. GRupo agora pode ser null na API.
+          var objeto = {name: this.novaFruta.name, descricao: this.novaFruta.descricao, imagem: this.novaFruta.imagem, 
+            grupo: this.novaFruta.grupo, propriedades: [], curiosidades: []};
+         
+          axios.post('http://localhost:8000/frutas/', objeto)
+                    .then(response => {
+                        this.response = response
+                        this.errors = ''
+                        this.listar();
+                        window.alert(objeto.name + " foi adicionado! :)");
+                    })
+                    .catch(errors => {
+                        this.errors = errors;
+                        if (errors == "Error: Request failed with status code 400") {
+                          window.alert("Requisição inválida. Por favor verifique os campos novamente.");
+                        }
+                    });
+          
+        },
+
+        excluirFruta : function() {
+          
+          axios.delete('http://localhost:8000/frutas/' + this.idAserExcluido + '/')
+            .then( response => {
+              this.listar();
+              window.alert("Fruta excluida!");
+            })
+            .catch( errors => {
+              console.log(errors)
+              if (errors == "Error: Request failed with status code 404") {
+                window.alert("Não há fruta com o id informado.");
+              }
+            })
+        }
+      }
+    });
+
+    //Script pra abrir o Modal
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems);
+    })
+  </script>
+</html>

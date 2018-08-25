@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Frutas</title>
+  <script src="vue.min.js"></script>
+  <script src="axios.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="materialize/css/materialize.css">
+  <script type="text/javascript" src="materialize/js/materialize.js"></script>
+  <link rel="stylesheet" type="text/css" href="meuCss/estilo.css">
+</head>
+
+<body>
+
+  <header>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">API Frutas</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="frutas.html">Frutas</a></li>
+          <li><a href="grupos.html">Grupos</a></li>
+          <li><a href="propriedades.html">Propriedades</a></li>
+          <li><a href="curiosidades.html">Curiosidades</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <div id="principal">
+
+  <div id = "app">
+
+    <input v-model = "frutaId" v-bind:value="frutaId" placeholder = "Id da fruta">
+     <a class="waves-effect waves-light btn modal-trigger"  @click.prevent = "buscaFruta">Buscar</a>
+    <input v-model = "editadaFruta.name" v-bind:value="editadaFruta.name" placeholder = "Nome da fruta">
+    <input v-model = "editadaFruta.descricao" v-bind:value="editadaFruta.descricao" placeholder = "Descricao">
+    <input v-model = "editadaFruta.imagem" v-bind:value="editadaFruta.imagem" placeholder = "Link da imagem">
+    <input v-model = "editadaFruta.grupo" v-bind:value="editadaFruta.grupo" placeholder = "Grupo relacionado">  
+    <a class="waves-effect waves-light btn modal-trigger"  @click.prevent = "editarFruta">Editar</a>
+        
+        
+  </div>
+
+  </div>
+
+  <footer class="page-footer">
+    <div class="footer-copyright">
+        <div class="container">
+          Frutas© 2018. Todos os direitos reservados.
+        </div>
+    </div>
+  </footer>
+            
+
+</body>
+
+<script type="text/javascript">
+    var app = new Vue({
+      el : '#app',
+      data : {
+        frutaId: '',
+        editadaFruta: {name: '', descricao: '', imagem: '', grupo:  ''},        
+      },
+      mounted() {
+  
+      },
+      methods : {
+
+        buscaFruta : function() {
+          console.log(this.frutaId)
+          axios.get('http://localhost:8000/frutas/'+this.frutaId+'/')
+            .then( response => {
+              console.log(response.data);
+              this.editadaFruta = response.data;
+
+            })
+            .catch( errors => {
+              console.log(errors)
+              if (errors == "Error: Request failed with status code 404") {
+                window.alert("Não há fruta com o id informado.");
+              }
+            })
+        },
+
+        editarFruta: function(){
+          console.log(this.editadaFruta)
+
+          //var objeto = {name: this.editadaFruta.name, descricao: this.editadaFruta.descricao, imagem: this.editadaFruta.imagem, 
+            //grupo: this.editadaFruta.grupo}
+
+          axios.put('http://localhost:8000/frutas/'+this.frutaId+'/', this.editadaFruta)
+                    .then(response => {
+                        this.response = response
+                        window.alert("Fruta editada com sucesso! :)");
+                    }).catch(errors => {
+                        this.errors = errors;
+                        if (errors == "Error: Request failed with status code 400") {
+                          console.log(errors)
+                          window.alert("Requisição inválida. Por favor verifique os campos novamente.");
+                        }
+                    });
+
+        }
+
+      }
+      });
+
+    //Script pra abrir o Modal
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems);
+    })
+  </script>
+</html>
